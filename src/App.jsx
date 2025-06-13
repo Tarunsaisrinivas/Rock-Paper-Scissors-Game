@@ -14,6 +14,23 @@ const App = () => {
   const [result, setResult] = useState("");
   const [countdown, setCountdown] = useState(null);
   const [score, setScore] = useState({ player: 0, computer: 0 });
+  const hasPlayedRef = useRef(false);
+
+  // mobile responsive
+  // At the top of the App function
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize(); // Call initially
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // mobile responsive end
 
   // Load handpose model
   useEffect(() => {
@@ -44,15 +61,18 @@ const App = () => {
           drawKeypoints(hand[0].landmarks, ctx);
 
           // Detect gesture only when countdown is 0 and choice not yet made
-          if (countdown === 0 && !playerChoice) {
+          if (countdown === 0 && !hasPlayedRef.current) {
             const gesture = classifyGesture(hand[0].landmarks);
             if (gesture) {
+              hasPlayedRef.current = true; // lock for this round
               setPlayerChoice(gesture);
               playComputerRound(gesture);
             } else {
               setResult("Gesture unclear. Try again.");
             }
           }
+          
+          
         }
       }
 
@@ -69,6 +89,7 @@ const App = () => {
     setPlayerChoice(null);
     setComputerChoice(null);
     setResult("");
+    hasPlayedRef.current = false; // reset the round lock
 
     const interval = setInterval(() => {
       setCountdown((prev) => {
@@ -182,40 +203,52 @@ const App = () => {
   };
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <h1>🖐️ Rock Paper Scissors</h1>
-
-      <div className="flex-container">
-        <Webcam
-          ref={webcamRef}
-          mirrored
-          width={640}
-          height={480}
-          style={{ position: "absolute" }}
-        />
-        <canvas
-          ref={canvasRef}
-          width={640}
-          height={480}
-          style={{ position: "absolute", zIndex: 1 }}
-        />
-      </div>
-
-      {!countdown ? (
-        <button onClick={startGame}>Start</button>
+    <>
+      {isMobile ? (
+        <div className="mobile-warning">
+          <h2>🔒 Not Available on Mobile</h2>
+          <p>
+            This interactive game works best on a desktop or laptop with a
+            webcam. Please switch to a larger screen to play.
+          </p>
+        </div>
       ) : (
-        <h2>{countdown}</h2>
-      )}
+        <div style={{ textAlign: "center" }}>
+          <h1>🖐️ Rock Paper Scissors</h1>
 
-      <div className="scoreboard">
-        <h3>Your Choice: {playerChoice || "None"}</h3>
-        <h3>Computer: {computerChoice || "None"}</h3>
-        <h2 className="result-text">{result}</h2>
-        <h4>
-          Score: You {score.player} - {score.computer} Computer
-        </h4>
-      </div>
-    </div>
+          <div className="flex-container">
+            <Webcam
+              ref={webcamRef}
+              mirrored
+              width={640}
+              height={480}
+              style={{ position: "absolute" }}
+            />
+            <canvas
+              ref={canvasRef}
+              width={640}
+              height={480}
+              style={{ position: "absolute", zIndex: 1 }}
+            />
+          </div>
+
+          {!countdown ? (
+            <button onClick={startGame}>Start</button>
+          ) : (
+            <h2>{countdown}</h2>
+          )}
+
+          <div className="scoreboard">
+            <h3>Your Choice: {playerChoice || "None"}</h3>
+            <h3>Computer: {computerChoice || "None"}</h3>
+            <h2 className="result-text">{result}</h2>
+            <h4>
+              Score: You {score.player} - {score.computer} Computer
+            </h4>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

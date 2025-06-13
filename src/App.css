@@ -59,7 +59,7 @@ canvas,
 video {
   border-radius: 12px;
   width: 100%;
-  margin-left: -310px;
+  margin-left: -320px;
   user-select: none;
 }
 
@@ -99,4 +99,34 @@ button:hover {
   font-weight: 700;
   color: #ffdd57;
   text-shadow: 0 0 10px #ffdd57;
+}
+
+/* Responsive: Hide main app on mobile, show warning */
+@media (max-width: 768px) {
+  .app-container {
+    display: none !important;
+  }
+
+  .mobile-warning {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #1e1e2f;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .mobile-warning h2 {
+    font-size: 2rem;
+    color: #ffdd57;
+    margin-bottom: 12px;
+  }
+
+  .mobile-warning p {
+    font-size: 1.1rem;
+    color: #ccc;
+    max-width: 90%;
+  }
 }
